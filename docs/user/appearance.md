@@ -29,6 +29,24 @@ The controls retreat as the composer docks after you send the first message.
 Turn on **Composer context** to keep those controls visible after the thread starts. This preference
 applies to the web and desktop clients.
 
+## Live thinking
+
+The **Live thinking** section in the thread details card shows the reasoning text supplied by your
+provider as it arrives, separately from the conversation. Toggle it in **Settings → Appearance →
+Thread details**, or in the details card's context menu. Scroll up to pause following; select
+**Follow** to return to the latest output. Copy or download the loaded reasoning history from the
+section header. The text is shown without Markdown rendering or summarization.
+
+Your model server must emit reasoning. Model loading and prompt processing may take time before
+the first chunk arrives. Hosted providers can supply summaries rather than full reasoning, and
+this view cannot expose text they do not return.
+
+For a local OpenAI-compatible server that accepts `chat_template_kwargs.enable_thinking`, the
+optional `node scripts/local-thinking-bridge.mjs --port 18011 --target http://127.0.0.1:8011` helper
+enables thinking on chat requests and forwards response bytes unchanged. Point your local
+provider's base URL at `http://127.0.0.1:18011/v1`. It listens only on this computer and makes no
+additional model calls.
+
 ## Math
 
 Turn on **Render math** in **Settings → Appearance** to typeset LaTeX in messages and Markdown
