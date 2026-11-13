@@ -1,4 +1,4 @@
-import { MessageId, ProviderDriverKind, ThreadId } from "@t3tools/contracts";
+import { MessageId, ProviderDriverKind, ThreadId, TurnItemId } from "@t3tools/contracts";
 import type * as ProviderAdapter from "@t3tools/provider-core/server/ProviderAdapter";
 import * as DateTime from "effect/DateTime";
 import { assert, describe, expect, it } from "vite-plus/test";
@@ -59,6 +59,37 @@ const snapshot = (id: string, text: string, streaming: boolean) =>
   }) satisfies ProviderAdapter.ProviderAdapterV2Event;
 const shown = (event: ProviderAdapter.ProviderAdapterV2Event | null) =>
   event?.type === "message.updated" ? event.message.text : null;
+
+it.each(["paragraph", "turn"] as const)("forwards every reasoning update in %s mode", (mode) => {
+  const filter = makeAssistantStreamingFilter(mode);
+  for (const [index, text] of ["I", "I need", "I need to calculate"].entries()) {
+    const event = {
+      type: "turn_item.updated",
+      driver: ProviderDriverKind.make("opencode"),
+      turnItem: {
+        id: TurnItemId.make("reasoning"),
+        threadId: ThreadId.make("thread"),
+        runId: null,
+        nodeId: null,
+        providerThreadId: null,
+        providerTurnId: null,
+        nativeItemRef: null,
+        parentItemId: null,
+        ordinal: 0,
+        status: "running",
+        title: null,
+        startedAt: null,
+        completedAt: null,
+        updatedAt: createdAt,
+        type: "reasoning",
+        text,
+        streaming: true,
+      },
+    } satisfies ProviderAdapter.ProviderAdapterV2Event;
+    expect(filter.filter(event, index)).toBe(event);
+    expect(filter.nextIdleFlushAt()).toBeNull();
+  }
+});
 
 it.each<{ readonly name: string; readonly mode?: "turn"; readonly steps: ReadonlyArray<Step> }>([
   {

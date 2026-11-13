@@ -32,9 +32,10 @@ function coalescibleUpdateKey(input: ThreadLiveEvent): string | null {
   if (event.type !== "turn-item.updated" || event.payload.status !== "running") return null;
   switch (event.payload.type) {
     case "assistant_message":
-    case "reasoning":
       if (!event.payload.streaming) return null;
       break;
+    case "reasoning":
+      return null;
     case "command_execution":
     case "file_change":
     case "file_search":

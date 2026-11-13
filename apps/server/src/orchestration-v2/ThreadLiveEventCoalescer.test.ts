@@ -412,6 +412,23 @@ describe("ThreadLiveEventCoalescer", () => {
       }),
   );
 
+  it.effect("preserves each adjacent reasoning update", () =>
+    Effect.scoped(
+      Effect.gen(function* () {
+        const coalescer = yield* makeThreadLiveEventCoalescer();
+        const events = [
+          makeTextItem(1, { type: "reasoning", text: "I" }),
+          makeTextItem(2, { type: "reasoning", text: "I need" }),
+          makeTextItem(3, { type: "reasoning", text: "I need to calculate" }),
+        ];
+        expect(coalesceLiveUpdatedEvents(events)).toEqual(events);
+        yield* coalescer.offerAll(events);
+        yield* coalescer.end;
+        expect(yield* Stream.runCollect(coalescer.stream)).toEqual(events);
+      }),
+    ),
+  );
+
   it.effect("flushes text at synchronization and completion boundaries", () =>
     Effect.scoped(
       Effect.gen(function* () {
@@ -436,7 +453,7 @@ describe("ThreadLiveEventCoalescer", () => {
         ];
         yield* coalescer.offerAll(events);
         yield* coalescer.end;
-        expect(yield* Stream.runCollect(coalescer.stream)).toEqual(events.slice(2));
+        expect(yield* Stream.runCollect(coalescer.stream)).toEqual(events);
         expect(yield* coalescer.usage).toEqual({ retainedItems: 0, retainedSerializedBytes: 0 });
       }),
     ),

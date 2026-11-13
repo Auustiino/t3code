@@ -132,6 +132,7 @@ export function makeAssistantStreamingFilter(
       event: ProviderAdapter.ProviderAdapterV2Event,
       now: number,
     ): ProviderAdapter.ProviderAdapterV2Event | null {
+      if (event.type === "turn_item.updated" && event.turnItem.type === "reasoning") return event;
       if (
         event.type === "node.updated" &&
         event.node.kind === "assistant_message" &&
